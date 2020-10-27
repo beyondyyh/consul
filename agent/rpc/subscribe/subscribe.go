@@ -155,6 +155,7 @@ func newEventFromStreamEvent(event stream.Event) *pbsubscribe.Event {
 
 func setPayload(e *pbsubscribe.Event, payload interface{}) {
 	switch p := payload.(type) {
+	// TODO: maybe broken?
 	case []stream.Event:
 		e.Payload = &pbsubscribe.Event_EventBatch{
 			EventBatch: &pbsubscribe.EventBatch{

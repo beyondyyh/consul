@@ -15,6 +15,14 @@ type EventPayloadCheckServiceNode struct {
 	Value *structs.CheckServiceNode
 }
 
+func (e EventPayloadCheckServiceNode) MatchRequest(key, namespace string) bool {
+	if key == "" && namespace == "" {
+		return
+	}
+
+	return key == e.Value.Service.Service && namespace == e.Value.Service.EnterpriseMeta.GetNamespace()
+}
+
 // serviceHealthSnapshot returns a stream.SnapshotFunc that provides a snapshot
 // of stream.Events that describe the current state of a service health query.
 //

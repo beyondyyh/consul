@@ -16,13 +16,18 @@ type Event struct {
 	Topic   Topic
 	Key     string
 	Index   uint64
-	Payload interface{}
+	Payload Payload
+}
+
+type Payload interface {
+	// MatchRequest must return true if the Payload matches the Key and Namespace.
+	MatchRequest(key, namespace string) bool
 }
 
 // Len returns the number of events contained within this event. If the Payload
 // is a []Event, the length of that slice is returned. Otherwise 1 is returned.
 func (e Event) Len() int {
-	if batch, ok := e.Payload.([]Event); ok {
+	if batch, ok := e.Payload.(payloadEvents); ok {
 		return len(batch)
 	}
 	return 1
@@ -31,7 +36,7 @@ func (e Event) Len() int {
 // Filter returns an Event filtered to only those Events where f returns true.
 // If the second return value is false, every Event was removed by the filter.
 func (e Event) Filter(f func(Event) bool) (Event, bool) {
-	batch, ok := e.Payload.([]Event)
+	batch, ok := e.Payload.(payloadEvents)
 	if !ok {
 		return e, f(e)
 	}
@@ -50,7 +55,7 @@ func (e Event) Filter(f func(Event) bool) (Event, bool) {
 		return e, size != 0
 	}
 
-	filtered := make([]Event, 0, size)
+	filtered := make(payloadEvents, 0, size)
 	for idx := range batch {
 		event := batch[idx]
 		if f(event) {
@@ -62,6 +67,13 @@ func (e Event) Filter(f func(Event) bool) (Event, bool) {
 	}
 	e.Payload = filtered
 	return e, true
+}
+
+type payloadEvents []Event
+
+func (e payloadEvents) MatchRequest(key, namespace string) bool {
+	// TODO:
+	return true
 }
 
 // IsEndOfSnapshot returns true if this is a framing event that indicates the
@@ -80,10 +92,22 @@ func (e Event) IsNewSnapshotToFollow() bool {
 
 type endOfSnapshot struct{}
 
+func (endOfSnapshot) MatchRequest(string, string) bool {
+	return true
+}
+
 type newSnapshotToFollow struct{}
+
+func (newSnapshotToFollow) MatchRequest(string, string) bool {
+	return true
+}
 
 type closeSubscriptionPayload struct {
 	tokensSecretIDs []string
+}
+
+func (closeSubscriptionPayload) MatchRequest(string, string) bool {
+	return true
 }
 
 // NewCloseSubscriptionEvent returns a special Event that is handled by the
