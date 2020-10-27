@@ -61,6 +61,18 @@ var testSnapshotEvent = Event{
 	Index:   1,
 }
 
+type simplePayload struct {
+	key   string
+	value string
+}
+
+func (p simplePayload) MatchRequest(key, _ string) bool {
+	if key == "" {
+		return true
+	}
+	return p.key == key
+}
+
 func newTestSnapshotHandlers() SnapshotHandlers {
 	return SnapshotHandlers{
 		testTopic: func(req SubscribeRequest, buf SnapshotAppender) (uint64, error) {

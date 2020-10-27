@@ -17,7 +17,11 @@ type EventPayloadCheckServiceNode struct {
 
 func (e EventPayloadCheckServiceNode) MatchRequest(key, namespace string) bool {
 	if key == "" && namespace == "" {
-		return
+		return true
+	}
+
+	if e.Value.Service == nil {
+		return false
 	}
 
 	return key == e.Value.Service.Service && namespace == e.Value.Service.EnterpriseMeta.GetNamespace()
