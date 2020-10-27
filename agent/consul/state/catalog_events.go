@@ -15,7 +15,7 @@ type EventPayloadCheckServiceNode struct {
 	Value *structs.CheckServiceNode
 }
 
-func (e EventPayloadCheckServiceNode) MatchRequest(key, namespace string) bool {
+func (e EventPayloadCheckServiceNode) FilterByKey(key, namespace string) bool {
 	if key == "" && namespace == "" {
 		return true
 	}

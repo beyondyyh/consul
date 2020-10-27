@@ -397,13 +397,22 @@ func newTestSnapshotHandlers(s *Store) stream.SnapshotHandlers {
 					Topic:   req.Topic,
 					Key:     req.Key,
 					Index:   node.ModifyIndex,
-					Payload: node,
+					Payload: nodePayload{node: node, key: req.Key},
 				}
 				snap.Append([]stream.Event{event})
 			}
 			return idx, nil
 		},
 	}
+}
+
+type nodePayload struct {
+	key  string
+	node *structs.ServiceNode
+}
+
+func (p nodePayload) FilterByKey(key, namespace string) bool {
+	return p.key == key
 }
 
 func createTokenAndWaitForACLEventPublish(t *testing.T, s *Store) *structs.ACLToken {

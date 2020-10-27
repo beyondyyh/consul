@@ -117,7 +117,7 @@ func newEventFromBatch(req SubscribeRequest, events []Event) Event {
 		Topic:   req.Topic,
 		Key:     req.Key,
 		Index:   first.Index,
-		Payload: payloadEvents(events),
+		Payload: PayloadEvents(events),
 	}
 }
 
@@ -129,7 +129,7 @@ func filterByKey(req SubscribeRequest, events []Event) (Event, bool) {
 
 	fn := func(e Event) bool {
 		// TODO: add req.Namespace
-		return e.Payload.MatchRequest(req.Key, "")
+		return e.Payload.FilterByKey(req.Key, "")
 	}
 	return event.Filter(fn)
 }
